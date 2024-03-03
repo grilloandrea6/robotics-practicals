@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "hardware.h": "c",
+        "module.h": "c",
+        "robot.h": "c"
+    }
+}
