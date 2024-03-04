@@ -5,8 +5,8 @@
 #include "registers.h"
 #include "hardware.h"
 
-float freq = 1.0;   // Hz
-float ampl = 40;
+volatile float freq = 1.0;   // Hz
+volatile float ampl = 40;
 
 const uint8_t MOTOR_ADDR = 21;
 
@@ -18,8 +18,6 @@ const uint8_t MOTOR_ADDR = 21;
  */
 static int8_t register_handler(uint8_t operation, uint8_t address, RadioData* radio_data)
 {
-  uint8_t i;
-  
   switch (operation)
   {
     case ROP_WRITE_8:
@@ -56,9 +54,6 @@ void sine_demo_mode()
   init_body_module(MOTOR_ADDR);
   start_pid(MOTOR_ADDR);
 
-  // Registers the register handler callback function
-  radio_add_reg_callback(register_handler);
-
   do {
     // Calculates the delta_t in seconds and adds it to the current time
     dt = getElapsedSysTICs(cycletimer);
@@ -76,7 +71,9 @@ void sine_demo_mode()
     pause(ONE_MS);
 
   } while (reg8_table[REG8_MODE] == IMODE_SINE_DEMO);
-
+  bus_set(MOTOR_ADDR, MREG_SETPOINT, DEG_TO_OUTPUT_BODY(0.0));
+  pause(ONE_SEC);
+  bus_set(MOTOR_ADDR, MREG_MODE, MODE_IDLE);
   // Back to the "normal" green
   set_color(2);
 }
@@ -84,6 +81,9 @@ void sine_demo_mode()
 void main_mode_loop()
 {
   reg8_table[REG8_MODE] = IMODE_IDLE;
+  
+  // Registers the register handler callback function
+  radio_add_reg_callback(register_handler);
 
   while (1)
   {

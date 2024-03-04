@@ -2,11 +2,12 @@
 #include "remregs.h"
 #include "regdefs.h"
 #include "robot.h"
+#include "utils.h"
 #include <math.h>
 
 using namespace std;
 
-#define DT 10
+#define DT .01
 
 const uint8_t RADIO_CHANNEL = 201;         ///< robot radio channel
 const char* INTERFACE = "COM1";            ///< robot radio interface
@@ -23,10 +24,14 @@ int main()
   reboot_head(regs);
   
   regs.set_reg_b(REG8_MODE, 1);
-  for(volatile uint32_t i = 0; i < 10000; i += DT ) {
-    regs.set_reg_b(10, ENCODE_PARAM_8(40 * sin(2 * M_PI * i),-50,50));
 
-    Sleep(DT);
+  double actTime = time_d();
+
+  while(!kbhit()) {
+    while(time_d() - actTime < DT);
+    actTime = time_d();
+
+    regs.set_reg_b(10, ENCODE_PARAM_8(40 * sin(2 * M_PI * actTime),-50,50));
   }
   regs.set_reg_b(REG8_MODE, 0);
   

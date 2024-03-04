@@ -11,15 +11,13 @@ const char* INTERFACE = "COM1";            ///< robot radio interface
 void display_multibyte_register(CRemoteRegs& regs, const uint8_t addr)
 {
   uint8_t data_buffer[32], len;
-  if (regs.get_reg_mb(addr, data_buffer, len)) {
-    cout << (int) len << " bytes: ";
-    for (unsigned int i(0); i < len; i++) {
-      if (i > 0) cout << ", ";
-      cout << (int) data_buffer[i];
+  if (regs.get_reg_mb(addr, data_buffer, len) && len == 4) {
+    for(uint8_t i = 0; i < 4; i++) {
+      cout << (int) (int8_t) data_buffer[i] << " ";
     }
     cout << endl;
   } else {
-    cerr << "Unable to read multibyte register." << endl;
+    cerr << "Data transmission error." << endl;
   }
 }
 
@@ -36,8 +34,6 @@ int main()
   
   while(1) {
     display_multibyte_register(regs, 2);
-
-    Sleep(200); 
   }
   
   regs.close();

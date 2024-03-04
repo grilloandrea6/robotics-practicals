@@ -9,5 +9,6 @@
 
 /// The main loop for mode switching
 void main_mode_loop(void);
+void motor_demo_mode(void);
 
 #endif // __MODES_H

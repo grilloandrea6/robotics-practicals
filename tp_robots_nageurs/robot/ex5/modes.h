@@ -12,5 +12,6 @@
 
 /// The main loop for mode switching
 void main_mode_loop(void);
+void sine_demo_mode(void);
 
 #endif // __MODES_H

@@ -1,5 +1,6 @@
 #ifndef __MODES_H
 #define __MODES_H
+#include <stdint.h>
 
 /// Idle mode: do nothing
 #define IMODE_IDLE          0
@@ -12,5 +13,7 @@
 
 /// The main loop for mode switching
 void main_mode_loop(void);
+void sine_demo_mode(void);
+
 
 #endif // __MODES_H

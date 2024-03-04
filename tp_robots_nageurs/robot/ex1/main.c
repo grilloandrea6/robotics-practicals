@@ -4,13 +4,13 @@
 
 int main(void)
 {
-  int8_t i;
+  //int8_t i;
 
   hardware_init();
   reg32_table[REG32_LED] = LED_MANUAL;  // manual LED control
 
   while (1) {
-    for (i = 0; i < 127; i++) {
+    /*for (i = 0; i < 127; i++) {
       set_rgb(i, 0, 0);
       pause(TEN_MS);
     }
@@ -33,7 +33,13 @@ int main(void)
     for (i = 127; i >= 0; i--) {
       set_rgb(0, 0, i);
       pause(TEN_MS);
-    }
+    }*/
+	
+	set_rgb(0,255,0);
+	pause(ONE_SEC / 2);
+	set_rgb(0,0,0);
+  pause(ONE_SEC / 2);
+
   }
   return 0;
 }
