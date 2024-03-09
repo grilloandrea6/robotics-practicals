@@ -86,7 +86,7 @@ int main()
 
   string time = ctime(&startingTime);
 
-  saveToCSV(x_hist, y_hist, "trajectory-" + time + ".csv");
+  saveToCSV(x_hist, y_hist, "trajectory-" + time + "_" + phase + "_" + freq + "_" + ampl + ".csv");
 
   float start_x = x_hist.front(), start_y = y_hist.front(), end_x = x_hist.back(), end_y = y_hist.back();
 
@@ -109,7 +109,7 @@ void saveToCSV(vector<double> x, vector<double> y, string filename) {
         return;
     }
     file << "x,y" << endl;
-     
+
     for (size_t i = 0; i < x.size(); ++i) {
         file << x[i] << "," << y[i] << "\n";
     }
