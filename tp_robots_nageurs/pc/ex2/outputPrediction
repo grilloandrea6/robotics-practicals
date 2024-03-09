@@ -1,0 +1,13 @@
+get_reg_b(6)  = 0
+get_reg_b(21)  = 42
+get_reg_b(21)  = 42
+get_reg_b(6)  = 2
+get_reg_b(6)  = 0
+get_reg_mb(2) = 0 bytes:
+get_reg_mb(2) = 8 bytes: 104 105 106 107 108 109 110 111
+get_reg_mb(2) = 8 bytes: 11 22 106 107 108 109 110 111
+get_reg_dw(2) = 2121
+get_reg_dw(2) = 8128
+
+
+
