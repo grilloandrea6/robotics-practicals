@@ -6,10 +6,10 @@
 #include "hardware.h"
 #include "can.h"
 
-volatile float freq  =  1.0;   // Hz
+volatile float freq      = 1.0;   // Hz
 volatile float ampl_set  = 0.0;
 volatile float ampl;
-volatile float phase =  1.5;
+volatile float phase     = 1.5;
 
 const float AMPLITUDE_DECREASE_RATE = 0.1;
 
@@ -28,31 +28,17 @@ static int8_t register_handler(uint8_t operation, uint8_t address, RadioData* ra
     case ROP_WRITE_8:
       if (address == 10) {
         freq = DECODE_PARAM_8(radio_data->byte,(0),(2));
-
-        if(freq > 2.0f) freq = 2.0f;
-        
         return TRUE;
-      }
-      else if (address == 11) {
+      } else if (address == 11) {
         ampl_set = DECODE_PARAM_8(radio_data->byte,(0),(60));
-
-        if(ampl_set < 0.0f) ampl_set = 0.0f;
-        else if(ampl_set > 60.0f) ampl_set = 60.0f;
-
         return TRUE;
       } else if (address == 12) {
         phase = DECODE_PARAM_8(radio_data->byte,(0.5),(1.5));
-
-        if(phase < 0.5f) phase = 0.5f;
-        else if(phase > 1.5f) phase = 1.5f;
-
         return TRUE;
       }
   }
   return FALSE;
 }
-
-
 
 void traveling_wave_demo_mode()
 {
@@ -74,7 +60,6 @@ void traveling_wave_demo_mode()
     dt = getElapsedSysTICs(cycletimer);
     cycletimer = getSysTICs();
     delta_t = (float) dt / sysTICSperSEC;
-
 
     my_time += delta_t;
 
