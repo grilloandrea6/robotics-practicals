@@ -1,5 +1,5 @@
 CPP = g++
-CPPFLAGS = -Wall -O3 -I ../common -I ../../common
+CPPFLAGS = -Wall -O3 -I ../common -I ../../common -std=c++11
 
 MSG_LINKING = " [link]    "
 MSG_COMPILINGCPP = " [cpp]     "
@@ -14,7 +14,7 @@ MSG_CLEANING = " [clean]   "
 	@echo $(MSG_COMPILINGCPP) $<
 	@$(CPP) $(CPPFLAGS) -o $@ -c $<
 
-# Comment faire un exécutable
+# Comment faire un exï¿½cutable
 %:
 	@echo $(MSG_LINKING) $@
 	@$(CPP) $(CPPFLAGS) -o $@ $^ $(LIBS)

@@ -4,11 +4,17 @@
 #include <windows.h>
 #include "trkcli.h"
 #include "utils.h"
+#include "remregs.h"
+#include "regdefs.h"
+#include "robot.h"
 
 using namespace std;
 
-const char* TRACKING_PC_NAME = "biorobpc11";   ///< host name of the tracking PC
+const char* TRACKING_PC_NAME = "biorobpc6";   ///< host name of the tracking PC
 const uint16_t TRACKING_PORT = 10502;          ///< port number of the tracking PC
+
+const uint8_t RADIO_CHANNEL = 126;         ///< robot radio channel
+const char* INTERFACE = "COM3";            ///< robot radio interface
 
 const double X_MAX = 6.0f;  ///< maximum x coordinate
 const double Y_MAX = 2.0f;  ///< maximum y coordinate
@@ -16,9 +22,17 @@ const double Y_MAX = 2.0f;  ///< maximum y coordinate
 int main()
 {
   CTrackingClient trk;
+  CRemoteRegs regs;
 
   uint32_t rgb;
   uint8_t r = 64, g = 64, b = 64;
+
+  if (!init_radio_interface(INTERFACE, RADIO_CHANNEL, regs)) {
+    return 1;
+  }
+
+  // Reboots the head microcontroller to make sure it is always in the same state 
+  reboot_head(regs);
 
   // Connects to the tracking server
   if (!trk.connect(TRACKING_PC_NAME, TRACKING_PORT)) {
@@ -57,4 +71,7 @@ int main()
   
   // Clears the console input buffer (as kbhit() doesn't)
   FlushConsoleInputBuffer(GetStdHandle(STD_INPUT_HANDLE));
+
+  regs.close();
+
 }

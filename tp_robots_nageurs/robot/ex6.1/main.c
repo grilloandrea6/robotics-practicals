@@ -4,8 +4,8 @@
 #include "registers.h"
 #include "can.h"
 
-#define NUM_POS 4
-const uint8_t addresses[NUM_POS] = {72,73,74,21};
+#define NUM_POS 5
+const uint8_t addresses[NUM_POS] = {25,22,24,26,5};
 
 
 

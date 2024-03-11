@@ -7,7 +7,7 @@
 
 using namespace std;
 
-const char* TRACKING_PC_NAME = "biorobpc11";   ///< host name of the tracking PC
+const char* TRACKING_PC_NAME = "biorobpc6";    ///< host name of the tracking PC
 const uint16_t TRACKING_PORT = 10502;          ///< port number of the tracking PC
 
 int main()
@@ -16,8 +16,12 @@ int main()
 
   // Connects to the tracking server
   if (!trk.connect(TRACKING_PC_NAME, TRACKING_PORT)) {
+    cerr << "Cannot connect!" << endl;
     return 1;
   }
+
+  cout << "Connected!" << endl;
+  
 
   while (!kbhit()) {
     uint32_t frame_time;
