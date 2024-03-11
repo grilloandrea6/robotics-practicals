@@ -28,25 +28,13 @@ static int8_t register_handler(uint8_t operation, uint8_t address, RadioData* ra
   {
     case ROP_WRITE_8:
       if (address == 10) {
-        freq = DECODE_PARAM_8(radio_data->byte,(0),(2));
-
-        if(freq > 2.0f) freq = 2.0f;
-        
+        freq = DECODE_PARAM_8(radio_data->byte,(0),(2));        
         return TRUE;
-      }
-      else if (address == 11) {
+      } else if (address == 11) {
         ampl_set = DECODE_PARAM_8(radio_data->byte,(0),(60));
-
-        if(ampl_set < 0.0f) ampl_set = 0.0f;
-        else if(ampl_set > 60.0f) ampl_set = 60.0f;
-
         return TRUE;
       } else if (address == 12) {
         phase = DECODE_PARAM_8(radio_data->byte,(0.5),(1.5));
-
-        if(phase < 0.5f) phase = 0.5f;
-        else if(phase > 1.5f) phase = 1.5f;
-
         return TRUE;
       } else if (address == 13) {
         steering = DECODE_PARAM_8(radio_data->byte,(-30),(30));
@@ -85,9 +73,7 @@ void traveling_wave_demo_mode()
     for (uint8_t i = 0; i < NUM_POS; i++) {
       ampl = (1 - i * AMPLITUDE_DECREASE_RATE) > 0 ? (ampl_set) * (1 - i * AMPLITUDE_DECREASE_RATE > 0) : 0;
 
-      
       l = ampl * sin(M_TWOPI * (freq * my_time + i * phase / NUM_POS)) + steering;
-
 
       if (l < -60) l = -60;
       else if (l > 60) l = 60;
@@ -97,7 +83,6 @@ void traveling_wave_demo_mode()
       bus_set(addresses[i], MREG_SETPOINT, DEG_TO_OUTPUT_BODY(l_rounded));
     }
 
-    
     // Make sure there is some delay, so that the timer output is not zero
     pause(ONE_MS);
 
@@ -108,8 +93,8 @@ void traveling_wave_demo_mode()
   
   pause(ONE_SEC);
   
-  // for (uint8_t i = 0; i < NUM_POS; i++)
-  //   bus_set(addresses[i], MREG_MODE, MODE_IDLE);
+  for (uint8_t i = 0; i < NUM_POS; i++)
+    bus_set(addresses[i], MREG_MODE, MODE_IDLE);
   
   // Back to the "normal" green
   set_color(2);
