@@ -3,15 +3,6 @@
 #include "regdefs.h"
 #include "robot.h"
 #include "utils.h"
-//#include <stdint.h>
-//#include <windows.h>
-//#include "trkcli.h"
-//#include <math.h>
-//#include <ctime>
-//#include <string>
-//#include <string.h>
-//#include <vector>
-//#include <fstream>
 
 using namespace std;
 
@@ -23,8 +14,6 @@ const uint32_t  TEST_DURATION    = 200;            ///< duration of the movement
 
 int main(int argc, char* argv[]) // or char** argv 
 {
-
-  
   CRemoteRegs regs;
   float freq = strtod(argv[1], 0),
         ampl = strtod(argv[2], 0),
