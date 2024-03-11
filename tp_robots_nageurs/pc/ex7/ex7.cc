@@ -36,7 +36,6 @@ int main(int argc, char* argv[]) // or char** argv
   float freq = strtod(argv[1], 0),
         ampl = strtod(argv[2], 0),
         phase= strtod(argv[3], 0);
-  int do_pid = atoi(argv[4]);
 
   uint32_t frame_time;
   vector<double> x_hist;
@@ -48,22 +47,11 @@ int main(int argc, char* argv[]) // or char** argv
     return 1;
   }
 
-  if(do_pid)
-  {
-    // Reboots the head microcontroller to make sure it is always in the same state
-    reboot_head(regs);
 
-    regs.set_reg_b(REG8_MODE, 3);
-    cin >> do_pid;
-  } 
-  /*  
-  cout << "Insert frequency: ";
-  cin >> freq;
-  cout << "Insert amplitude: ";
-  cin >> ampl;
-  cout << "Insert total phase lag: ";
-  cin >> phase;
-  */
+  // Reboots the head microcontroller to make sure it is always in the same state
+  reboot_head(regs);
+  regs.set_reg_b(REG8_MODE, 3);
+
   cout << "Values set: " << freq << ", " << ampl << ", " << phase << endl;
 
   regs.set_reg_b(10, ENCODE_PARAM_8(freq,(0),(2)));

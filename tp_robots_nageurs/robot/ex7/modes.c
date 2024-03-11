@@ -98,8 +98,8 @@ void traveling_wave_demo_mode()
   
   pause(ONE_SEC);
   
-  // for (uint8_t i = 0; i < NUM_POS; i++)
-  //   bus_set(addresses[i], MREG_MODE, MODE_IDLE);
+  for (uint8_t i = 0; i < NUM_POS; i++)
+    bus_set(addresses[i], MREG_MODE, MODE_IDLE);
   
   // Back to the "normal" green
   set_color(2);

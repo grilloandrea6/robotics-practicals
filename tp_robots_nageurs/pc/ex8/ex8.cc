@@ -34,11 +34,9 @@ int main(int argc, char* argv[]) // or char** argv
         steering = strtod(argv[4], 0);
   int do_pid = atoi(argv[5]);
 
-  uint32_t frame_time;
   vector<double> x_hist;
   vector<double> y_hist;
   vector<double> t_hist;
-  double x,y;
 
   if (!init_radio_interface(INTERFACE, RADIO_CHANNEL, regs)) {
     return 1;
