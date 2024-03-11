@@ -3,13 +3,10 @@
 #include "regdefs.h"
 #include "robot.h"
 #include "utils.h"
-#include <stdint.h>
 #include <windows.h>
 #include "trkcli.h"
 #include <math.h>
 #include <ctime>
-#include <string>
-#include <string.h>
 #include <vector>
 #include <fstream>
 
