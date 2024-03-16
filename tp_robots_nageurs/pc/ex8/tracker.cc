@@ -26,7 +26,6 @@ void saveToCSV(vector<double> x, vector<double> y, vector<double> t, string file
 int main(int argc, char* argv[]) // or char** argv 
 {
   CTrackingClient trk;
-cout << " eccheppalleeeee" << endl;
   // Connects to the tracking server
   if (!trk.connect(TRACKING_PC_NAME, TRACKING_PORT)) {
     return 1;
@@ -38,22 +37,18 @@ cout << " eccheppalleeeee" << endl;
   vector<double> t_hist;
   double x,y;
 
-
   // start time cycle
   double startingTime = time_d();
   double currentTime  = time_d();
-    cout << " eccheppalleeeee" << endl;
   while(currentTime - startingTime < TEST_DURATION)
   {
     cout << "-";
     currentTime = time_d();
 
-    
     // Gets the current position
     if (!trk.update(frame_time)) {
       cerr << "Could not get position from tracking." << endl;
     } else {
-
       // Gets the ID of the first spot (the tracking system supports multiple ones)
       int id = trk.get_first_id();
         
@@ -64,7 +59,6 @@ cout << " eccheppalleeeee" << endl;
           t_hist.push_back(currentTime);
           cout.precision(8);
           cout << "x: " << x << " y: " << y << " t: " << fixed << currentTime << endl;
-
       } else {
           cerr << "Could not get position from tracking." << endl;          
       }

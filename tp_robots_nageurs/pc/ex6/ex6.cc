@@ -21,7 +21,6 @@ int main()
   }
 
   cout << "Connected!" << endl;
-  
 
   while (!kbhit()) {
     uint32_t frame_time;
