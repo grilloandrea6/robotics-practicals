@@ -31,7 +31,7 @@ int main()
     while(time_d() - actTime < DT);
     actTime = time_d();
 
-    regs.set_reg_b(10, ENCODE_PARAM_8(40 * sin(2 * M_PI * actTime),-50,50));
+    regs.set_reg_b(10, ENCODE_PARAM_8(40 * sin(2 * M_PI * actTime),-40,40));
   }
   regs.set_reg_b(REG8_MODE, 0);
   

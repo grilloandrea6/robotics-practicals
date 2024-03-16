@@ -16,7 +16,7 @@ double setpoint = 0;
 static int8_t register_handler(uint8_t operation, uint8_t address, RadioData* radio_data)
 {
   if(operation == ROP_WRITE_8 && address == 10) {
-    setpoint = DECODE_PARAM_8(radio_data->byte,(-50),(50));
+    setpoint = DECODE_PARAM_8(radio_data->byte,(-40),(40));
     return TRUE;
   }
   return FALSE;
