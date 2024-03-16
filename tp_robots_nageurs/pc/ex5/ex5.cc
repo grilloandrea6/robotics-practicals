@@ -22,7 +22,6 @@ int main()
   reboot_head(regs);
   
   regs.set_reg_b(REG8_MODE, 2);
-  //while(!kbhit());
   ext_key();
   regs.set_reg_b(REG8_MODE, 0);
   

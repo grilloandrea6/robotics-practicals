@@ -6,6 +6,7 @@
 #include "hardware.h"
 
 const float FREQ = 1.0;   // Hz
+const float AMPL =  40;   // Degrees
 const uint8_t MOTOR_ADDR = 21;
 
 void sine_demo_mode()
@@ -28,7 +29,7 @@ void sine_demo_mode()
     my_time += delta_t;
 
     // Calculates the sine wave
-    l = 40 * sin(M_TWOPI * FREQ * my_time);
+    l = AMPL * sin(M_TWOPI * FREQ * my_time);
     l_rounded = (int8_t) l;
 
     bus_set(MOTOR_ADDR, MREG_SETPOINT, DEG_TO_OUTPUT_BODY(l_rounded));

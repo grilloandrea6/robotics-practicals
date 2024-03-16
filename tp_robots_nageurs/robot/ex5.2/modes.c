@@ -10,32 +10,22 @@ volatile float ampl = 40;
 
 const uint8_t MOTOR_ADDR = 21;
 
-
-
-/* Register callback function, handles some new registers on the radio.
- * All these registers are of course completely useless, but it demonstrates how
- * to implement a register callback function, and what it can do.
- */
 static int8_t register_handler(uint8_t operation, uint8_t address, RadioData* radio_data)
 {
-  switch (operation)
+  if(operation == ROP_WRITE_8)
   {
-    case ROP_WRITE_8:
-      if (address == 10) {
-        freq = DECODE_PARAM_8(radio_data->byte,(0),(2));
+    if (address == 10) 
+    {
+      freq = DECODE_PARAM_8(radio_data->byte,(0),(2));
+      
+      return TRUE;
+    }
+    else if (address == 11) 
+    {
+      ampl = DECODE_PARAM_8(radio_data->byte,(-60),(60));
 
-        if(freq > 2.0f) freq = 2.0f;
-        
-        return TRUE;
-      }
-      else if (address == 11) {
-        ampl = DECODE_PARAM_8(radio_data->byte,(-60),(60));
-
-        if(ampl < -60.0f) ampl = -60.0f;
-        else if(ampl > 60.0f) ampl = 60.0f;
-
-        return TRUE;
-      }
+      return TRUE;
+    }
   }
   return FALSE;
 }
