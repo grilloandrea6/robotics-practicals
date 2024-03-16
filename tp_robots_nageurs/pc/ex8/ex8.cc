@@ -18,7 +18,8 @@ int main(int argc, char* argv[]) // or char** argv
   float freq = strtod(argv[1], 0),
         ampl = strtod(argv[2], 0),
         phase= strtod(argv[3], 0),
-        steering = strtod(argv[4], 0);
+        steering_set = strtod(argv[4], 0),
+        steering;
 
   if (!init_radio_interface(INTERFACE, RADIO_CHANNEL, regs)) {
     return 1;
@@ -33,7 +34,7 @@ int main(int argc, char* argv[]) // or char** argv
   regs.set_reg_b(10, ENCODE_PARAM_8(freq,(0),(2)));
   regs.set_reg_b(11, ENCODE_PARAM_8(ampl,(0),(60)));
   regs.set_reg_b(12, ENCODE_PARAM_8(phase,(0.5),(1.5)));
-  regs.set_reg_b(13, ENCODE_PARAM_8(steering,(-30),(+30)));
+  regs.set_reg_b(13, ENCODE_PARAM_8(0,(-30),(+30)));
 
   uint32_t rgb = (255 << 16) | (255 << 8) | 255;
   regs.set_reg_dw(0, rgb);
@@ -49,9 +50,9 @@ int main(int argc, char* argv[]) // or char** argv
 
     uint16_t inp = ext_key();
     char a = inp & 0xFF;
-    if(a == 'a') steering = 20;
+    if(a == 'a') steering = steering_set;
     else if(a == 'w') steering = 0;
-    else if(a == 'd') steering = -20;
+    else if(a == 'd') steering = -steering_set;
     cout << a << endl;
 
     regs.set_reg_b(13, ENCODE_PARAM_8(steering,(-30),(+30)));
