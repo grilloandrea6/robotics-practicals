@@ -1,85 +1,110 @@
 % Ex 1
 close all
 clear all
-t = 0:0.01:2*pi;
-x0 = 0.015; % m
 
-f = 1;
-a = 0.0015; % m
+% initial parameters definition
+t = 0:0.01:10; % time
 
-p0 = 1.293; % kg/m^3
-pp = 31;    % styrofoam density, kg/m^3
-mu0 = 1.81e-5; % kg/(m·s) dynamic viscosity of air
+x0 = 0.015;                % amplitude of linear translation [m]
+a = 0.0015;                % radius of the sphere            [m]
 
+p0 = 1.293;                % density of air                  [kg/m^3] - ToDo add reference
+pp = 31;                   % density of styrene              [kg/m^3]
+c0 = 346;                  % speed of sound in air           [m/s]
+cp = (2350+1120+1840)/3;   % speed of sound in styrene       [m/s]  - https://www.engineeringtoolbox.com/sound-speed-solids-d_713.html
+mu0 = 1.81e-5;             % dynamic viscosity of air        [kg/(m·s)] - ToDo add reference
+m = (4/3) * pi * a^3 * pp; % mass of the sphere              [kg]
+
+% f1 and f2 computation
+f1 = 1 - (p0 * c0^2)/(p0*cp^2);
+
+f2 = 2 * ((pp - p0) / (2 * pp + p0));
+
+
+% drag force and inertial load computation for 2.5Hz
+f=2.5;
 x = x0 * sin(2*pi*f*t);
-y = 0;
-
-
 
 x_dot = x0 * 2 * pi * f * cos(2*pi*f*t);
-
 x_ddot = -x0 * (2*pi*f)^2 * sin(2*pi*f*t);
 
-m = 4 / 3 * pi * a^3 * pp;
 
-inertial_load = m * x_ddot;
+Re = abs(x_dot) * p0 * 2 * a / mu0;
 
-q_dot_norm = abs(x_dot);
-
-Re = q_dot_norm * p0 * 2 * a / mu0;
-
-c0 = 346;
-cp = 1234; %??
 cd = 24./Re + 2.6*(Re./5) ./ (1 + (Re./5).^1.52) + 0.411*(Re./2.63e5).^-7.94 ./ (1 + (Re./2.63e5).^-8 ) + 0.25*(Re./1e6) ./ (1 + Re./1e6);
 
+drag = -0.5 .* p0 .* pi .* a.^2 .* abs(x_dot).^2 .* cd .* Re;
+inertial_load = m * x_ddot;
 
-drag = -0.5 .* p0 .* pi .* a.^2 .* q_dot_norm.^2 .* cd .* Re;
-
-
-f1 = 1 - (p0 * c0^2)/(p0*cp^2)
-
-f2 = 2 * ((pp - p0) / (2 * pp + p0))
-
-% U = 2 .* pi .* a.^3 .* ()
-
-figure(1)
-plot(t, drag)
-figure(2)
-plot(x, drag)
-
-
+% plotting
 figure(1)
 % Plot the first subplot
-subplot(3, 1, 1);
-plot(t, drag);
-title('time vs drag');
+subplot(2, 1, 1);
+plot(x, abs(drag));
+xlabel('x [mm]');
+ylabel('F_d [N]');
+title('Drag force along trajectory (f=2.5Hz)');
 
 % Plot the second subplot
-subplot(3, 1, 2);
-plot(t, inertial_load);
-title('time vs inertial load');
+subplot(2, 1, 2);
+plot(x, abs(inertial_load));
+xlabel('x [mm]');
+ylabel('F_i [N]');
+title('Inertial load along trajectory (f=2.5Hz)');
 
-% Plot the third subplot
-subplot(3, 1, 3);
-hold on
-plot(t, drag);
-plot(t, inertial_load);
-title('time vs both');
+
+% maximum drag force and inertial load for range of frequencies
+
+inload_range = [];
+drag_range = [];
+frequencies = linspace(0.1,5,50); % Hz
+
+for i = 1 : length(frequencies)
+    f = frequencies(i);
+    
+    x = x0 * sin(2*pi*f*t);
+    
+    x_dot = x0 * 2 * pi * f * cos(2*pi*f*t);
+    x_ddot = -x0 * (2*pi*f)^2 * sin(2*pi*f*t);
+    
+    
+    Re = abs(x_dot) * p0 * 2 * a / mu0;
+    
+    cd = 24./Re + 2.6*(Re./5) ./ (1 + (Re./5).^1.52) + 0.411*(Re./2.63e5).^-7.94 ./ (1 + (Re./2.63e5).^-8 ) + 0.25*(Re./1e6) ./ (1 + Re./1e6);
+    
+    drag = -0.5 .* p0 .* pi .* a.^2 .* x_dot.^2 .* cd .* Re;
+    inertial_load = m * x_ddot;
+
+    inload_range = [inload_range max(abs(inertial_load))];
+    drag_range = [drag_range max(abs(drag))];
+    
+end
 
 figure(2)
-% Plot the first subplot
-subplot(3, 1, 1);
-plot(x, drag);
-title('space vs drag');
+subplot(3,1,1)
+plot(frequencies,drag_range)
+title('Maximum drag force vs frequency')
+xlabel('f [Hz]')
+ylabel('F_d [N]')
 
-% Plot the second subplot
-subplot(3, 1, 2);
-plot(x, inertial_load);
-title('space vs inertial load');
+subplot(3,1,2)
+plot(frequencies,inload_range)
+title('Maximum inertial load vs frequency')
+xlabel('f [Hz]')
+ylabel('F_i [N]')
 
-% Plot the third subplot
-subplot(3, 1, 3);
+subplot(3,1,3)
+plot(frequencies,drag_range, "r")
 hold on
-plot(x, drag);
-plot(x, inertial_load);
-title('space vs both');
+plot(frequencies,inload_range, "b")
+
+% plot intertial load and drag as a function of frequency
+% 3 groups of 2 plots
+
+
+% intertial leads to escape
+% but there is a point around 0.5Hz drag force is higher
+
+
+% put a reference for each constant we used
+
