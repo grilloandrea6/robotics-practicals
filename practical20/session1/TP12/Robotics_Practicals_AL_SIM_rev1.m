@@ -35,7 +35,7 @@ LW = 2;                         % Line Width
 ANIMATE = 1;                    % Animate the dynamic response
 DS = 1;                         % DownSample for animation visualization (Higher INTEGER numbers lead to faster animations)
 % Define parameteres 
-V = 8;                          % V - Transducers' voltage amplitude (0-10)
+V = 5;                          % V - Transducers' voltage amplitude (0-10)
 a = 1.5e-3;                     % m - particle radius
 rho_sty = 31;                   % The density range is about 28–34 kg/m3: https://en.wikipedia.org/wiki/Polystyrene#:~:text=The%20density%20range%20is%20about%2028%E2%80%9334%20kg%2Fm3.
 g = 9.8;                        % m s-2 - Gravity constant
@@ -50,7 +50,7 @@ load("Al_Gorkov_1m_1V.mat");    % Assuming 1V, radius = 1m 'ZZgrk','RRgrk','Frgr
 % dlgtitle = 'Prescaler - to remove the dialog box comment lines 49-52 & uncoment line 53';
 % dims = [1 100]; definput = {'1'}; answer = inputdlg(prompt,dlgtitle,dims,definput);
 % Prescaler = str2double(answer{1});
-Prescaler = 1.9;
+Prescaler = 1.97163;
 Frgrk = Prescaler*Frgrk;
 Fzgrk = Prescaler*Fzgrk;
 
@@ -62,7 +62,7 @@ Amp_u = 0;                  % m - translational oscillation amplitude
 phi_u = 0;                  % rad - translational phase
 % Rotation th =  Amp_th*sin((fex_th*2*pi)*tt+phi_th); (motor 2)
 fex_th = 0;                 % Hz - rotational oscillation frequency
-Amp_th = 90/180*pi;       % rad - rotational oscillation amplitude
+Amp_th = 45/180*pi;       % rad - rotational oscillation amplitude
 phi_th = 0;        % rad - rotational phase
 
 w_u = 2*pi*fex_u;           % Hz -> rad/s
@@ -108,104 +108,127 @@ subplot(2,2,4)
     xlabel('$t$ (s)','Interpreter','latex')
     set(gca,'FontSize',Fsize)
 set(gcf,'color','w','units','normalized','position',FPos)
-
 %% Simulate dynamic case - start from the equilibrium point
-% Translation u =  Amp_u*sin((fex_u*2*pi)*tt+phi_u); (motor 2)
-fex_u = 5;                  % Hz - translational oscillation frequency
-Amp_u = 40e-3;              % m - translational oscillation amplitude
-phi_u = 0;         % rad - translational phase
-% Rotation th =  Amp_th*sin((fex_th*2*pi)*tt+phi_th); (motor 1)
-fex_th = 5;                 % Hz - rotational oscillation frequency
 
-w_u = 2*pi*fex_u;           % Hz -> rad/s
-w_th = 2*pi*fex_th;         % Hz -> rad/s
-% Automatically set the time vector according to the frequencies
-Maxf = max([fex_u;fex_th]); 
-minf = min([fex_u;fex_th]);
-if ~minf
-    minf = Maxf;
+% % my_ampl = [5e-3 10e-3 15e-3];
+% my_freq = [1 2 3 4 5];
+my_ampl = 15e-3;
+my_freq = 5;
+[my_ampl, my_freq] = ndgrid(my_ampl, my_freq);
+
+for my_idx = 1:length(my_ampl(:))
+    % Translation u =  Amp_u*sin((fex_u*2*pi)*tt+phi_u); (motor 2)
+%     fex_u = 5;                  % Hz - translational oscillation frequency
+%     Amp_u = 10e-3;              % m - translational oscillation amplitude
+%     phi_u = -pi/2;         % rad - translational phase
+%     % Rotation th =  Amp_th*sin((fex_th*2*pi)*tt+phi_th); (motor 1)
+%     fex_th = 0;     % Hz - rotational oscillation frequency
+
+    % Translation u =  Amp_u*sin((fex_u*2*pi)*tt+phi_u); (motor 2)
+    fex_u = my_freq(my_idx);                  % Hz - translational oscillation frequency
+    Amp_u = my_ampl(my_idx);              % m - translational oscillation amplitude
+    phi_u = -pi/2;         % rad - translational phase
+    % Rotation th =  Amp_th*sin((fex_th*2*pi)*tt+phi_th); (motor 1)
+    Amp_th = 60/180*pi;
+    fex_th = fex_u;                 % Hz - rotational oscillation frequency
+    phi_th = -pi/2;
+
+
+    w_u = 2*pi*fex_u;           % Hz -> rad/s
+    w_th = 2*pi*fex_th;         % Hz -> rad/s
+    % Automatically set the time vector according to the frequencies
+    Maxf = max([fex_u;fex_th]); 
+    minf = min([fex_u;fex_th]);
+    if ~minf
+        minf = Maxf;
+    end
+    % Initial conditions 
+    IC = [r0 z0 0 0]';          % [r z dr dz] - initial conditions (ode45)
+    dt = 1e-2/Maxf;
+    tt = (0:dt:30/minf)';       % s - define the time vector (ode45)
+    opts = odeset('RelTol',1e-6,'AbsTol',1e-8);
+    
+    % Simulate 
+    cN = 0;						% remove Numerical damping
+    [~,x_0] = ode45(@(t,x) Robotics_Practicals_AL_ode(t,x,w_u,w_th,Amp_u,Amp_th,phi_u,phi_th,a,V,RRgrk,ZZgrk,Frgrk,Fzgrk,cN), tt, IC, opts);
+    
+    r = x_0(:,1);                       % m - get the r coordinate
+    z = x_0(:,2);                       % m - get the z coordinate
+    u = Amp_u*sin(w_u*tt+phi_u);        % m - get the u coordinate
+    th = Amp_th*sin(w_th*tt+phi_th);    % rad - get the theta coordinate
+    X = u + r.*cos(th)-z.*sin(th);      % m - compute the particle x position in th
+    Y = r.*sin(th)+z.*cos(th);          % m - compute the particle y position in th
+    
+    % Plot theresults of the dynamic symulation
+    figure(2); clf
+    subplot(2,2,1)
+        plot(tt,X*1e3,'LineWidth',LW);
+        ylabel('$x$ (mm)','Interpreter','latex')
+        set(gca,'FontSize',Fsize)
+        xlim([tt(1) tt(end)])
+    subplot(2,2,2)
+        plot(tt,Y*1e3,'LineWidth',LW);
+        ylabel('$y$ (mm)','Interpreter','latex')
+        set(gca,'FontSize',Fsize)
+        xlim([tt(1) tt(end)])
+    subplot(2,2,3)
+        plot(tt,r*1e3,'LineWidth',LW);
+        ylabel('$r$ (mm)','Interpreter','latex')
+        xlabel('$t$ (s)','Interpreter','latex')
+        set(gca,'FontSize',Fsize)
+        xlim([tt(1) tt(end)])
+    subplot(2,2,4)
+        plot(tt,z*1e3,'LineWidth',LW);
+        ylabel('$z$ (mm)','Interpreter','latex')
+        xlabel('$t$ (s)','Interpreter','latex')
+        set(gca,'FontSize',Fsize)
+        xlim([tt(1) tt(end)])
+    set(gcf,'color','w','units','normalized','position',FPos)
+
+     filename = "plot5V-5Hz-15mm-freqth5Hz-ampth60-ph-90"; %sprintf('plotV%d-f%d-u%d-fth%d-ampth%d-phth%d', round(V*1000),round(my_freq(my_idx)*10^4),round(1000*my_ampl(my_idx),round(1000*fex_th,roundTies="toEven"),round(1000*Amp_th,roundTies="toEven"),round(1000*phi_th,roundTies="toEven")));
+     saveas(gcf,filename,'eps')
+     saveas(gcf,filename,'png')
+     
+
+
+    
+    % Plot the steady state - last slow cycles or common cycle
+    cycles = 1;
+    Tss = lcm(round(1e3/minf),round(1e3/Maxf));
+    Tss = Tss*1e-3;
+    if Tss>tt(end)
+        Tss = cycles/minf;
+    end
+    tt_ss = tt(tt >= tt(end) - Tss);
+    X_ss = X(tt >= tt(end) - Tss);
+    Y_ss = Y(tt >= tt(end) - Tss);
+    u_ss = u(tt >= tt(end) - Tss);
+    
+    figure(3); clf
+    subplot(2,2,1)
+        plot(X_ss*1e3,Y_ss*1e3,'LineWidth',LW);
+        xlabel('$x$ (mm)','Interpreter','latex')
+        ylabel('$y$ (mm)','Interpreter','latex')
+        set(gca,'FontSize',Fsize)
+    subplot(2,2,2)
+        plot((X_ss-u_ss)*1e3,Y_ss*1e3,'LineWidth',LW);
+        ylabel('$y$ (mm)','Interpreter','latex')
+        xlabel('$x-u$ (mm)','Interpreter','latex')
+        set(gca,'FontSize',Fsize)
+    subplot(2,2,3)
+        plot(X_ss*1e3,Y_ss*1e3,'LineWidth',LW);
+        ylabel('$y$ (mm)','Interpreter','latex')
+        xlabel('$x$ (mm)','Interpreter','latex')
+        axis equal
+        set(gca,'FontSize',Fsize)
+    subplot(2,2,4)
+        plot((X_ss-u_ss)*1e3,Y_ss*1e3,'LineWidth',LW);
+        ylabel('$y$ (mm)','Interpreter','latex')
+        xlabel('$x-u$ (mm)','Interpreter','latex')
+        axis equal
+        set(gca,'FontSize',Fsize)
+    set(gcf,'color','w','units','normalized','position',FPos)
 end
-% Initial conditions 
-IC = [r0 z0 0 0]';          % [r z dr dz] - initial conditions (ode45)
-dt = 1e-2/Maxf;
-tt = (0:dt:30/minf)';       % s - define the time vector (ode45)
-opts = odeset('RelTol',1e-6,'AbsTol',1e-8);
-
-% Simulate 
-cN = 0;						% remove Numerical damping
-[~,x_0] = ode45(@(t,x) Robotics_Practicals_AL_ode(t,x,w_u,w_th,Amp_u,Amp_th,phi_u,phi_th,a,V,RRgrk,ZZgrk,Frgrk,Fzgrk,cN), tt, IC, opts);
-
-r = x_0(:,1);                       % m - get the r coordinate
-z = x_0(:,2);                       % m - get the z coordinate
-u = Amp_u*sin(w_u*tt+phi_u);        % m - get the u coordinate
-th = Amp_th*sin(w_th*tt+phi_th);    % rad - get the theta coordinate
-X = u + r.*cos(th)-z.*sin(th);      % m - compute the particle x position in th
-Y = r.*sin(th)+z.*cos(th);          % m - compute the particle y position in th
-
-% Plot theresults of the dynamic symulation
-figure(2); clf
-subplot(2,2,1)
-    plot(tt,X*1e3,'LineWidth',LW);
-    ylabel('$x$ (mm)','Interpreter','latex')
-    set(gca,'FontSize',Fsize)
-    xlim([tt(1) tt(end)])
-subplot(2,2,2)
-    plot(tt,Y*1e3,'LineWidth',LW);
-    ylabel('$y$ (mm)','Interpreter','latex')
-    set(gca,'FontSize',Fsize)
-    xlim([tt(1) tt(end)])
-subplot(2,2,3)
-    plot(tt,r*1e3,'LineWidth',LW);
-    ylabel('$r$ (mm)','Interpreter','latex')
-    xlabel('$t$ (s)','Interpreter','latex')
-    set(gca,'FontSize',Fsize)
-    xlim([tt(1) tt(end)])
-subplot(2,2,4)
-    plot(tt,z*1e3,'LineWidth',LW);
-    ylabel('$z$ (mm)','Interpreter','latex')
-    xlabel('$t$ (s)','Interpreter','latex')
-    set(gca,'FontSize',Fsize)
-    xlim([tt(1) tt(end)])
-set(gcf,'color','w','units','normalized','position',FPos)
-
-
-% Plot the steady state - last slow cycles or common cycle
-cycles = 1;
-Tss = lcm(round(1e3/minf),round(1e3/Maxf));
-Tss = Tss*1e-3;
-if Tss>tt(end)
-    Tss = cycles/minf;
-end
-tt_ss = tt(tt >= tt(end) - Tss);
-X_ss = X(tt >= tt(end) - Tss);
-Y_ss = Y(tt >= tt(end) - Tss);
-u_ss = u(tt >= tt(end) - Tss);
-
-figure(3); clf
-subplot(2,2,1)
-    plot(X_ss*1e3,Y_ss*1e3,'LineWidth',LW);
-    xlabel('$x$ (mm)','Interpreter','latex')
-    ylabel('$y$ (mm)','Interpreter','latex')
-    set(gca,'FontSize',Fsize)
-subplot(2,2,2)
-    plot((X_ss-u_ss)*1e3,Y_ss*1e3,'LineWidth',LW);
-    ylabel('$y$ (mm)','Interpreter','latex')
-    xlabel('$x-u$ (mm)','Interpreter','latex')
-    set(gca,'FontSize',Fsize)
-subplot(2,2,3)
-    plot(X_ss*1e3,Y_ss*1e3,'LineWidth',LW);
-    ylabel('$y$ (mm)','Interpreter','latex')
-    xlabel('$x$ (mm)','Interpreter','latex')
-    axis equal
-    set(gca,'FontSize',Fsize)
-subplot(2,2,4)
-    plot((X_ss-u_ss)*1e3,Y_ss*1e3,'LineWidth',LW);
-    ylabel('$y$ (mm)','Interpreter','latex')
-    xlabel('$x-u$ (mm)','Interpreter','latex')
-    axis equal
-    set(gca,'FontSize',Fsize)
-set(gcf,'color','w','units','normalized','position',FPos)
-
 
 %% Animate the results
 if ANIMATE

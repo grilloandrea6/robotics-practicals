@@ -85,12 +85,14 @@ SmallP = double(A0(ixSP,iySP));                 % Small particle tracking region
 for kk = 1:Nf
     
     % Request applied voltage and particle index
-    prompt = {'Voltage value', 'Particle number' };
-    dlgtitle = Files{kk};
-    dims = [1 100]; definput = {'10','1'}; answer = inputdlg(prompt,dlgtitle,dims,definput);
-    V_V(kk) = str2double(answer{1});        % Real Frame rate
-    P_index(kk) = str2double(answer{2});    % Hz - Excitation frequency
-    
+    %prompt = {'Voltage value', 'Particle number' };
+    %dlgtitle = Files{kk};
+    %dims = [1 100]; definput = {'10','1'}; answer = inputdlg(prompt,dlgtitle,dims,definput);
+    %V_V(kk) = str2double(answer{1});        % Real Frame rate
+    %P_index(kk) = str2double(answer{2});    % Hz - Excitation frequency
+    V_V(kk) = str2double(Files{kk}(4:6))/10;
+    P_index(kk) = str2double(Files{kk}(2));
+
     % Coose the region to estimate the location of the top hollow marker
     % Coose the region to estimate the location of the bottom full marker
     % Choose the general region to estimate the particle location
@@ -205,12 +207,14 @@ O_angle_radN(1,1) = mean(O_angle_rad(ind1));
 figure(3); clf
     yyaxis left
     h(1,1) = plot(V_V(ind1),z(ind1),'--o'); hold all
-    h(2,1) = plot(V_V(ind2),z(ind2),'--x'); 
+    h(2,1) = plot(V_V(ind2),z(ind2),'--x'); hold all
+    h(3,1) = plot(V_V(ind3),z(ind3),'--square'); 
     xlabel('V (V)')
     ylabel('z (mm)')
     yyaxis right
     h(1,1) = plot(V_V(ind1),r(ind1),'--o'); 
     h(2,1) = plot(V_V(ind2),r(ind2),'--x'); 
+    h(3,1) = plot(V_V(ind3),r(ind3),'--square'); 
     ylabel('r (mm)')
     
 
