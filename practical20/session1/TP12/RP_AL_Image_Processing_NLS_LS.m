@@ -9,28 +9,31 @@ clear; clc; close all
 SAVE = 0;               % 1 - save data, 0 - don't save data
 magnification = 2e2;    % magnification coeficient
 % Load camera parameters
-[File, path] = uigetfile('*.mat','Select the camera calibration results','MultiSelect','off');
-load([path File]);
-
+%[File, path] = uigetfile('*.mat','Select the camera calibration results','MultiSelect','off');
+%load([path File]);
+load("calibrationData.mat")
+load("Device_Radii.mat")
 % Load dvice radii
-[File, path] = uigetfile('*.mat','Load the device radii','MultiSelect','off');
-load([path File]);
+%[File, path] = uigetfile('*.mat','Load the device radii','MultiSelect','off');
+%load([path File]);
 
 % Load a video file
-[File, path] = uigetfile('*.avi','Select a single video','MultiSelect','off');
+%[File, path] = uigetfile('*.avi','Select a single video','MultiSelect','off');
+% path = '/home/andrea'
+% File = 
 
 % Request prescalar value
-prompt = {'The real frame rate (FPS)', 'The exciatin frequency (Hz)' };
-dlgtitle = 'To remove the dialog box comment lines 15-20 & uncoment lines 22-24';
-dims = [1 100]; definput = {'50','1'}; answer = inputdlg(prompt,dlgtitle,dims,definput);
-Fs = str2double(answer{1});     % Real Frame rate
-Fex = str2double(answer{2});    % Hz - Excitation frequency
+% prompt = {'The real frame rate (FPS)', 'The exciatin frequency (Hz)' };
+% dlgtitle = 'To remove the dialog box comment lines 15-20 & uncoment lines 22-24';
+% dims = [1 100]; definput = {'50','1'}; answer = inputdlg(prompt,dlgtitle,dims,definput);
+% Fs = str2double(answer{1});     % Real Frame rate
+% Fex = str2double(answer{2});    % Hz - Excitation frequency
 
-% Fs = 50;                % Real Frame rate
-% Fex = 1.5;              % Hz - Excitation frequency
+Fs = 50;                % Real Frame rate
+Fex = 2;              % Hz - Excitation frequency
 
 % load the video
-s = [path File];
+s = '/home/andrea/2hz.avi';
 v = VideoReader(s,'CurrentTime',0); % open video file
 
 NpW = v.Width;                                  % No. of pixel w 
@@ -58,8 +61,8 @@ end
 % Choose the region to estimate the displacement
 % Choose the general area to capture the particle displacement
 % Choose small region aroud the particle
-figure(2);clf  
-    imshow(double(A0),A_lim, 'InitialMagnification', magnification); hold all
+%figure(2);clf  
+%    imshow(double(A0),A_lim, 'InitialMagnification', magnification); hold all
 figure(1);clf  
     imshow(Atemp,double(A_lim)*0.2, 'InitialMagnification', magnification); hold all
  
@@ -166,18 +169,6 @@ Amp_v = max([sqrt(coefs_v(1)^2+coefs_v(2)^2) sqrt(coefs_v(3)^2+coefs_v(4)^2) sqr
 
 UV_pos_mm_shift = C_v-[DC_u DC_v];
 
-figure(4);clf
-subplot(2,1,1)
-plot(timeV,[UV_pos_mm_shift(:,1) Amat_uv*coefs_u-DC_u, U_pos_mm_ss-(Amat_uv*coefs_u)],'--o')
-    ylabel('x (mm)')
-    legend('Measured','Fit','Error')
-    title(sprintf('Fitted frequency: %.3f Hz, Amplitude: %.3f mm, DC: %.3f mm',Fex2_ident_u,Amp_u,DC_u))
-subplot(2,1,2)
-plot(timeV,[UV_pos_mm_shift(:,2) Amat_uv*coefs_v-DC_v, V_pos_mm_ss-(Amat_uv*coefs_v)],'--o')
-    xlabel('t (s)')
-    ylabel('y (mm)')
-    title(sprintf('Amplitude: %.3f mm, DC: %.3f mm',Amp_v,DC_v))
-    legend('Measured','Fit','Error')
 
 %% 2) Fit harmonic signal to the instantanous angle (theta)
 O_angle_rad_ss = O_angle_rad(timeV>=0);
@@ -193,14 +184,28 @@ coefs_th = Amat_th\O_angle_rad_ss;                  % Solve LS problem for the i
 DC_th = coefs_th(end);
 [Amp_th, IM] = max([sqrt(coefs_th(1)^2+coefs_th(2)^2) sqrt(coefs_th(3)^2+coefs_th(4)^2) sqrt(coefs_th(5)^2+coefs_th(6)^2)]);
 Fex1_ident_th = Fex_ident_th*IM;
+figure(4);clf
+subplot(2,1,1)
+plot(timeV,[UV_pos_mm_shift(:,1) Amat_uv*coefs_u-DC_u, U_pos_mm_ss-(Amat_uv*coefs_u)],'--o')
+    ylabel('x (mm)')
+    legend('Measured','Fit','Error')
+    title(sprintf('Fitted frequency: %.3f Hz, Amplitude: %.3f mm, DC: %.3f mm',Fex2_ident_u,Amp_u,DC_u))
+%subplot(2,1,2)
+% plot(timeV,[UV_pos_mm_shift(:,2) Amat_uv*coefs_v-DC_v, V_pos_mm_ss-(Amat_uv*coefs_v)],'--o')
+%     xlabel('t (s)')
+%     ylabel('y (mm)')
+%     title(sprintf('Amplitude: %.3f mm, DC: %.3f mm',Amp_v,DC_v))
+%     legend('Measured','Fit','Error')
 
-figure(5);clf
+% figure(5);clf
+subplot(2,1,2)
 plot(timeV,[O_angle_rad Amat_th*coefs_th O_angle_rad-Amat_th*coefs_th]/pi*180,'--o'); hold all
 yline(DC_th/pi*180,'r')
     xlabel('t (s)')
     ylabel('\theta (\circ)')
     legend('Measured','Fit','Error','DC offset')
     title(sprintf('Fitted frequency: %.3f Hz, DC offset: %.3f, Amplitude: %.3f ',Fex1_ident_th,DC_th/pi*180,Amp_th/pi*180))
+figure(5); clf
 
 if SAVE==1
     Filenew = strrep(File,'avi','mat');

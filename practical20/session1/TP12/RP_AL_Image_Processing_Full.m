@@ -21,12 +21,14 @@ clear; clc; close all
 SAVE = 1;               % 1 - save data, 0 - do not save data
 magnification = 2e2;    % Magnification coeficient
 % Load camera parameters
-[File, path] = uigetfile('*.mat','Select the camera calibration results','MultiSelect','off');
-load([path File]);
+%[File, path] = uigetfile('*.mat','Select the camera calibration results','MultiSelect','off');
+%load([path File]);
+load("calibrationData.mat")
+load("Device_Radii.mat")
 
 % Load dvice radii
-[File, path] = uigetfile('*.mat','Load the device radii','MultiSelect','off');
-load([path File]);
+% [File, path] = uigetfile('*.mat','Load the device radii','MultiSelect','off');
+% load([path File]);
 
 % Load the video file
 [File, path] = uigetfile('*.avi','Select a single video','MultiSelect','off');
@@ -47,7 +49,7 @@ Pos_Mat_TG = Pos_Mat;                           % Prepare a matrix to store the 
 Pos_Mat_BG = Pos_Mat;                           % Prepare a matrix to store the position of the bottom marker
 O_angle_rad = zeros(Nf,1);                      % Prepare a vector to store the device instantanous angle (rad)
 
-A0 = undistortImage(readFrame(v),cameraParams); % Capture an image and undistort it
+A0 = readFrame(v); %undistortImage(readFrame(v),cameraParams); % Capture an image and undistort it
 A0 = rgb2gray(A0);
 A_lim = [0 max(A0(:))];
 
@@ -56,7 +58,7 @@ v = VideoReader(s,'CurrentTime',0);             % open video file
 Atemp = 0;
 while hasFrame(v)
     % Particle position
-    AA = undistortImage(readFrame(v),cameraParams); % Capture an image and undistort it
+    AA = readFrame(v); %undistortImage(readFrame(v),cameraParams); % Capture an image and undistort it
     AA = rgb2gray(AA);
     Atemp = Atemp+(AA)/Nf;
 end 
@@ -120,7 +122,7 @@ v = VideoReader(s,'CurrentTime',0);
 i_frame = 1;
 while hasFrame(v)
     % Particle position
-    Atemp = undistortImage(readFrame(v),cameraParams);                      % Read the next frame and undistort it
+    Atemp = readFrame(v); %undistortImage(readFrame(v),cameraParams);                      % Read the next frame and undistort it
     Atemp = rgb2gray(Atemp);
     GeneralP = double(Atemp(ixGP,iyGP));                                    % General particle tracking region
     COR2D = normxcorr2(SmallP,GeneralP);                                    % 2D correlation
