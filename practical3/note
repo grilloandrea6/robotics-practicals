@@ -1,0 +1,10 @@
+kp 30 starts oscillating
+
+kp 15 half of critical value
+ki 5 no steady state error
+kd 0.14
+
+30
+5
+0.035
+
